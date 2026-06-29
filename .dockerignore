@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Environment variables
+.env
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+
+# IDE files
+.vscode/
+.idea/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Logs
+*.log
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
