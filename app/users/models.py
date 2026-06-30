@@ -24,7 +24,7 @@ class UserPublic(UserBase):
 class UserCreate(UserBase):
     password:SecretStr
 class UserUpdate(UserBase):
-    password:SecretStr
+    password:SecretStr|None=None
     full_name:str|None=None
     user_name:str|None=None
     email:EmailStr|None=None
