@@ -26,11 +26,11 @@ def update_user(user:UserUpdate, session:SessionDep,db_user:UserDB=Depends(get_c
     session.commit()
     session.refresh(db_user)
     return db_user
-@router.delete("/users/me/delete",response_model=UserPublic)
+@router.delete("/users/me/delete")
 def delete_user(session:SessionDep,user:UserDB=Depends(get_current_user_active)):
     session.delete(user)
     session.commit()
-    return {"ok":True}
+    return {"ok":"true"}
 @router.get("/getposts/{user_id}")
 def get_posts(user_id:int,session:SessionDep):
     user=session.get(UserDB,user_id)
