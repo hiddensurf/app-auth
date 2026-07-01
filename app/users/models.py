@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 class UserBase(SQLModel):
     full_name:str=Field(max_length=70)
     user_name:str=Field(min_length=3,max_length=30,unique=True)
-    email:EmailStr
+    email:EmailStr=Field(unique=True)
     @field_validator("user_name")
     @classmethod
     def user_name_validator(cls,value):

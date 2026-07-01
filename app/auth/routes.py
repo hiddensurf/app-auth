@@ -20,9 +20,12 @@ async def login(session:SessionDep,form_data:Annotated[OAuth2PasswordRequestForm
     return Token(access_token=access_token,token_type="bearer")
 @router.post("/signup",status_code=status.HTTP_201_CREATED,response_model=UserPublic)
 def signup(session:SessionDep,user:UserCreate):
-    db_user=session.exec(select(UserDB).where(UserDB.user_name==user.user_name)).first()
-    if db_user:
+    existing_db_user=session.exec(select(UserDB).where(UserDB.user_name==user.user_name)).first()
+    if existing_db_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already taken")
+    exising_email=session.exec(select(UserDB).where(UserDB.email==user.email)).first()
+    if exising_email:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
     db_user=UserDB(**user.model_dump(exclude={"password"}),hashed_password=hash_password(user.password.get_secret_value()))
     session.add(db_user)
     session.commit()
