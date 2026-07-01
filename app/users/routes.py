@@ -1,5 +1,5 @@
 from .models import (UserDB,UserPublic,UserUpdate)
-from fastapi import APIRouter,Query,HTTPException,Depends
+from fastapi import APIRouter,Query,HTTPException,Depends,status
 from app.database.database import SessionDep
 from app.auth.security import hash_password,get_current_user_active
 from typing import Annotated
@@ -17,6 +17,14 @@ def get_user(user_id:int,session:SessionDep):
     return user
 @router.patch("/users/me/update",response_model=UserPublic)
 def update_user(user:UserUpdate, session:SessionDep,db_user:UserDB=Depends(get_current_user_active)):
+    if (user.user_name is not None and user.user_name != db_user.user_name):
+        existing_db_user=session.exec(select(UserDB).where(UserDB.user_name==user.user_name,UserDB.id != db_user.id)).first()
+        if existing_db_user:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already taken")
+    if (user.email is not None and user.email != db_user.email):    
+        exising_email=session.exec(select(UserDB).where(UserDB.email==user.email,UserDB.id != db_user.id)).first()
+        if exising_email:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
     user_model=user.model_dump(exclude_unset=True)
     if user.password is not None:
         user_model.pop("password",None)
