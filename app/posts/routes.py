@@ -7,7 +7,7 @@ from app.auth.security import get_current_user_active
 from sqlmodel import select
 from app.users.models import UserDB
 router=APIRouter(dependencies=[Depends(get_current_user_active)])
-@router.post("/posts/")
+@router.post("/posts/",status_code=201)
 def add_posts(post:PostCreate,session:SessionDep,user:UserDB=Depends(get_current_user_active)):
     if user.id is None:
         raise ValueError("User has no id")
