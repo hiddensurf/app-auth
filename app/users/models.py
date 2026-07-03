@@ -22,9 +22,9 @@ class UserDB(UserBase,table=True):
 class UserPublic(UserBase):
     id:int
 class UserCreate(UserBase):
-    password:SecretStr
+    password:SecretStr=Field(min_length=15)
 class UserUpdate(UserBase):
-    password:SecretStr|None=None
+    password:SecretStr|None=Field(min_length=15,default=None)
     full_name:str|None=None
     user_name:str|None=None
     email:EmailStr|None=None
