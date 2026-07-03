@@ -1,0 +1,3297 @@
+{
+  "info": {
+    "_postman_id": "44ac6c14-44d9-4caa-887f-dfb06c4c0d36",
+    "name": "app-auth-test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56260741",
+    "_collection_link": "https://go.postman.co/collection/56260741-44ac6c14-44d9-4caa-887f-dfb06c4c0d36?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Signup/Login",
+      "item": [
+        {
+          "name": "Success",
+          "item": [
+            {
+              "name": "Signup Success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "const expectedFullName = pm.environment.get(\"full_name\");",
+                      "const expectedUsername = pm.environment.get(\"user_name\");",
+                      "const expectedEmail = pm.environment.get(\"email\");",
+                      "pm.test(\"Response matches Request\" , function(){",
+                      "    pm.expect(resp.full_name).to.equal(expectedFullName);",
+                      "    pm.expect(resp.user_name).to.equal(expectedUsername);",
+                      "    pm.expect(resp.email).to.equal(expectedEmail);",
+                      "});",
+                      "if (pm.response.code === 201 && resp.id) {",
+                      "    pm.environment.set(\"user_id\", resp.id);",
+                      "}",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "const random = Math.floor(Math.random() * 1000000);",
+                      "pm.environment.set(\"full_name\", `John ${random}`);",
+                      "pm.environment.set(\"user_name\", `user${random}`);",
+                      "pm.environment.set(\"email\", `user${random}@example.com`);",
+                      "pm.environment.set(\"password\", `password${random}545657655463888`);",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"{{full_name}}\",\n  \"user_name\": \"{{user_name}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "signup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Login Success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\", function(){",
+                      "    pm.response.to.have.status(200)",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid Response\", function(){",
+                      "    pm.expect(resp).to.have.property(\"access_token\");",
+                      "    pm.expect(resp.access_token).to.be.a(\"string\").and.not.be.empty;",
+                      "    pm.expect(resp).to.have.property(\"token_type\");",
+                      "    pm.expect(resp.token_type).to.equal(\"bearer\");",
+                      "});",
+                      "if (pm.response.code === 200 && resp.access_token) {",
+                      "    pm.environment.set(\"access_token\", resp.access_token);",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "console.log(\"Logging in as:\", pm.environment.get(\"user_name\"));",
+                      "console.log(\"Password:\", pm.environment.get(\"password\"));"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "username",
+                      "value": "{{user_name}}",
+                      "type": "text",
+                      "uuid": "bf8588d1-7a15-40f1-b1b1-88abe05ac658"
+                    },
+                    {
+                      "key": "password",
+                      "value": "{{password}}",
+                      "type": "text",
+                      "uuid": "14a93857-6e06-4723-9ca0-a6f867af8be1"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/token",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "token"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Failure",
+          "item": [
+            {
+              "name": "Signup Failure username exists",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "const unique=Date.now();",
+                      "const randNum = Math.floor(Math.random() * 5) + 1;",
+                      "pm.variables.set(\"test_full_name\",`John ${unique}${randNum}`);",
+                      "pm.variables.set(\"test_email\",`user${unique}${randNum}@gmail.com`);",
+                      "pm.variables.set(\"test_password\",`password${unique}${randNum}`);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 409\",function (){",
+                      "    pm.response.to.have.status(409);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Error message is correct\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Username already taken\");",
+                      "",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"{{test_full_name}}\",\n  \"user_name\": \"calypso\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "signup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Signup Failure email exists",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "const unique=Date.now();",
+                      "const randNum = Math.floor(Math.random() * 5) + 1;",
+                      "pm.variables.set(\"test_full_name\",`John ${unique}${randNum}`);",
+                      "pm.variables.set(\"test_username\",`user_${unique}${randNum}`);",
+                      "pm.variables.set(\"test_password\",`password${unique}${randNum}`);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 409\",function (){",
+                      "    pm.response.to.have.status(409);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Error message is correct\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Email already exists\");",
+                      "",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"{{test_full_name}}\",\n  \"user_name\": \"{{test_username}}\",\n  \"email\": \"bjmoosic12@gmail.com\",\n  \"password\": \"{{test_password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "signup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Signup Failure No Body",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid response for no body\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"missing\");",
+                      "    pm.expect(error.loc).to.eql([\"body\"]);",
+                      "    pm.expect(error.msg).to.equal(\"Field required\");",
+                      "    pm.expect(error.input).to.be.null;",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "signup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Signup Failure short password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "const password=pm.variables.get(\"short_password\");",
+                      "const lengthpassword=password.length;",
+                      "pm.test(\"Valid response for short password\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"too_short\");",
+                      "    pm.expect(error.loc).to.eql([\"body\",\"password\"]);",
+                      "    pm.expect(error.msg).to.equal(`Value should have at least 15 items after validation, not ${lengthpassword}`);",
+                      "    pm.expect(error.input).to.equal(password);",
+                      "    pm.expect(error.ctx.field_type).to.equal(\"Value\");",
+                      "    pm.expect(error.ctx.min_length).to.equal(15);",
+                      "    pm.expect(error.ctx.actual_length).to.equal(lengthpassword);",
+                      "",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"Gregory House\",\n  \"user_name\": \"house_md\",\n  \"email\": \"housemd@gmail.com\",\n  \"password\": \"{{short_password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "signup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Signup Failure wrong email format(no '@')",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "const email=pm.variables.get(\"wrong_email_@\");",
+                      "pm.test(\"Valid response for wrong email format\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"value_error\");",
+                      "    pm.expect(error.loc).to.eql([\"body\",\"email\"]);",
+                      "    pm.expect(error.msg).to.equal(\"value is not a valid email address: An email address must have an @-sign.\");",
+                      "    pm.expect(error.input).to.equal(email);",
+                      "    pm.expect(error.ctx.reason).to.equal(\"An email address must have an @-sign.\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"Gregory House\",\n  \"user_name\": \"house_md\",\n  \"email\": \"{{wrong_email_@}}\",\n  \"password\": \",hjvghchgcjhgvuyuyugygiuihjhkjh\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "signup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Signup Failure wrong email format(missing username)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "const email=pm.variables.get(\"wrong_email_username\");",
+                      "pm.test(\"Valid response for wrong email format\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"value_error\");",
+                      "    pm.expect(error.loc).to.eql([\"body\",\"email\"]);",
+                      "    pm.expect(error.msg).to.equal(\"value is not a valid email address: There must be something before the @-sign.\");",
+                      "    pm.expect(error.input).to.equal(email);",
+                      "    pm.expect(error.ctx.reason).to.equal(\"There must be something before the @-sign.\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"Gregory House\",\n  \"user_name\": \"house_md\",\n  \"email\": \"{{wrong_email_username}}\",\n  \"password\": \",hjvghchgcjhgvuyuyugygiuihjhkjh\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "signup"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Login Failure invalid password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 401\", function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Error message is correct\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Invalid username or password\");",
+                      "",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "username",
+                      "value": "{{user_name}}",
+                      "type": "text",
+                      "uuid": "d78159ec-415e-4e6b-b9b6-1a41dd65a4a6"
+                    },
+                    {
+                      "key": "password",
+                      "value": "{{$randomPassword}}",
+                      "type": "text",
+                      "uuid": "6bd2b304-58f9-4c94-929a-f9b432c46ac3"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/token",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "token"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Login Failure Invalid username",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 401\", function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Error message is correct\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Invalid username or password\");",
+                      "",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "username",
+                      "value": "{{$randomUserName}}",
+                      "type": "text",
+                      "uuid": "a1f708b4-e051-4ef0-9820-7418a0debbd5"
+                    },
+                    {
+                      "key": "password",
+                      "value": "{{password}}",
+                      "type": "text",
+                      "uuid": "119ab8a5-7cb2-47f9-844b-3a74bfc58d96"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/token",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "token"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Login Failure Blank Username and Password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 422\", function () {",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "",
+                      "const resp = pm.response.json();",
+                      "",
+                      "pm.test(\"Validation errors for missing username and password\", function () {",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").with.lengthOf(2);",
+                      "",
+                      "    const usernameError = resp.detail.find(",
+                      "        e => JSON.stringify(e.loc) === JSON.stringify([\"body\", \"username\"])",
+                      "    );",
+                      "",
+                      "    const passwordError = resp.detail.find(",
+                      "        e => JSON.stringify(e.loc) === JSON.stringify([\"body\", \"password\"])",
+                      "    );",
+                      "",
+                      "    pm.expect(usernameError).to.exist;",
+                      "    pm.expect(usernameError.type).to.equal(\"missing\");",
+                      "    pm.expect(usernameError.msg).to.equal(\"Field required\");",
+                      "    pm.expect(usernameError.input).to.be.null;",
+                      "",
+                      "    pm.expect(passwordError).to.exist;",
+                      "    pm.expect(passwordError.type).to.equal(\"missing\");",
+                      "    pm.expect(passwordError.msg).to.equal(\"Field required\");",
+                      "    pm.expect(passwordError.input).to.be.null;",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "packages": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "key": "username",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "a1f708b4-e051-4ef0-9820-7418a0debbd5"
+                    },
+                    {
+                      "key": "password",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "119ab8a5-7cb2-47f9-844b-3a74bfc58d96"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/token",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "token"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Success",
+          "item": [
+            {
+              "name": "Get user from user_id",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\", function(){",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "const expectedFullName = pm.environment.get(\"target_full_name\");",
+                      "const expectedUsername = pm.environment.get(\"target_username\");",
+                      "const expectedEmail = pm.environment.get(\"target_email\");",
+                      "const expectedId = Number(pm.environment.get(\"target_user_id\"));",
+                      "pm.test(\"Valid response\", function(){",
+                      "    pm.expect(resp).to.have.property(\"full_name\");",
+                      "    pm.expect(resp).to.have.property(\"user_name\");",
+                      "    pm.expect(resp).to.have.property(\"email\");",
+                      "    pm.expect(resp).to.have.property(\"id\");",
+                      "    pm.expect(resp.full_name).to.equal(expectedFullName);",
+                      "    pm.expect(resp.user_name).to.equal(expectedUsername);",
+                      "    pm.expect(resp.email).to.equal(expectedEmail);",
+                      "    pm.expect(resp.id).to.equal(expectedId);",
+                      "",
+                      "})"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/users/{{target_user_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{target_user_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get every user's data",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\", function(){",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Each returned user has required fields\", function(){",
+                      "    resp.forEach(user =>{",
+                      "        pm.expect(user).to.have.property(\"full_name\");",
+                      "        pm.expect(user.full_name).to.be.a(\"string\");",
+                      "        pm.expect(user).to.have.property(\"user_name\");",
+                      "        pm.expect(user.user_name).to.be.a(\"string\");",
+                      "        pm.expect(user).to.have.property(\"email\");",
+                      "        pm.expect(user.email).to.be.a(\"string\");",
+                      "        pm.expect(user).to.have.property(\"id\");",
+                      "        pm.expect(Number.isInteger(user.id)).to.be.true;",
+                      "    });",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/user?offset={{offset}}&limit={{limit}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "user"
+                  ],
+                  "query": [
+                    {
+                      "key": "offset",
+                      "value": "{{offset}}"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "{{limit}}"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update current user data",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "const random = Math.floor(Math.random() * 1000000);",
+                      "pm.environment.set(\"full_name\", `John ${random}`);",
+                      "pm.environment.set(\"email\", `user${random}@example.com`);",
+                      "pm.environment.set(\"password\", `password${random}6`);",
+                      "console.log(\"PATCH token:\", pm.environment.get(\"access_token\"));",
+                      "console.log(\"PATCH username:\", pm.environment.get(\"user_name\"));"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\",function(){",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "const expectedUserid=Number(pm.environment.get(\"user_id\"));",
+                      "const expectedFullname=pm.environment.get(\"full_name\");",
+                      "const expectedEmail=pm.environment.get(\"email\");",
+                      "pm.test(\"Valid Response\", function(){",
+                      "    pm.expect(resp).to.have.property(\"id\");",
+                      "    pm.expect(Number.isInteger(resp.id)).to.be.true;",
+                      "    pm.expect(resp).to.have.property(\"full_name\");",
+                      "    pm.expect(resp).to.have.property(\"email\");",
+                      "    pm.expect(resp.id).to.equal(expectedUserid);",
+                      "    pm.expect(resp.full_name).to.equal(expectedFullname);",
+                      "    pm.expect(resp.email).to.equal(expectedEmail);",
+                      "    ",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"{{full_name}}\",\n  \"email\": \"{{email}}\",\n  \"password\":\"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/me/update",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get user's posts from user_id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\", function(){",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "const expectedUserid = Number(pm.environment.get(\"target_user_id\"));",
+                      "pm.test(\"Each returned post has required fields\", function(){",
+                      "    resp.forEach(post =>{",
+                      "        pm.expect(post).to.have.property(\"user_id\");",
+                      "        pm.expect(Number.isInteger(post.user_id)).to.be.true;",
+                      "        pm.expect(post.user_id).to.equal(expectedUserid);",
+                      "        pm.expect(post).to.have.property(\"post_id\");",
+                      "        pm.expect(Number.isInteger(post.post_id)).to.be.true;",
+                      "",
+                      "        pm.expect(post).to.have.property(\"title\");",
+                      "        pm.expect(post.title).to.be.a(\"string\");",
+                      "    });",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/getposts/{{target_user_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "getposts",
+                    "{{target_user_id}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Failure",
+          "item": [
+            {
+              "name": "Get user failure nonexistent user_id",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 404\", function(){",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid response\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"User not found\");",
+                      "})"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/users/2000000000",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "2000000000"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get user from user_id no token",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for no token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Not authenticated\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/users/{{target_user_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{target_user_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get user from user_id with invalid authentication",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for fake token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Could not validate credentials\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{fake_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/users/{{target_user_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{target_user_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get every user's data no token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for no token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Not authenticated\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/user?offset={{offset}}&limit={{limit}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "user"
+                  ],
+                  "query": [
+                    {
+                      "key": "offset",
+                      "value": "{{offset}}"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "{{limit}}"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get every user's data invalid authentication",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for fake token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Could not validate credentials\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{fake_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/user?offset={{offset}}&limit={{limit}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "user"
+                  ],
+                  "query": [
+                    {
+                      "key": "offset",
+                      "value": "{{offset}}"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "{{limit}}"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update current user data no token",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for no token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Not authenticated\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"{{full_name}}\",\n  \"email\": \"{{email}}\",\n  \"password\":\"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/me/update",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update current user data invalid authentication",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for fake token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Could not validate credentials\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{fake_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"{{full_name}}\",\n  \"email\": \"{{email}}\",\n  \"password\":\"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/me/update",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update current user data wrong email format(no '@')",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "const email=pm.variables.get(\"wrong_email_@\");",
+                      "pm.test(\"Valid response for wrong email format\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"value_error\");",
+                      "    pm.expect(error.loc).to.eql([\"body\",\"email\"]);",
+                      "    pm.expect(error.msg).to.equal(\"value is not a valid email address: An email address must have an @-sign.\");",
+                      "    pm.expect(error.input).to.equal(email);",
+                      "    pm.expect(error.ctx.reason).to.equal(\"An email address must have an @-sign.\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"{{full_name}}\",\n  \"email\": \"{{wrong_email_@}}\",\n  \"password\":\"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/me/update",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update current user data wrong email format(no username)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "const email=pm.variables.get(\"wrong_email_username\");",
+                      "pm.test(\"Valid response for wrong email format\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"value_error\");",
+                      "    pm.expect(error.loc).to.eql([\"body\",\"email\"]);",
+                      "    pm.expect(error.msg).to.equal(\"value is not a valid email address: There must be something before the @-sign.\");",
+                      "    pm.expect(error.input).to.equal(email);",
+                      "    pm.expect(error.ctx.reason).to.equal(\"There must be something before the @-sign.\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"{{full_name}}\",\n  \"email\": \"{{wrong_email_username}}\",\n  \"password\":\"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/me/update",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update current user data short password",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "const password=pm.variables.get(\"short_password\");",
+                      "const lengthpassword=password.length;",
+                      "pm.test(\"Valid response for short password\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"too_short\");",
+                      "    pm.expect(error.loc).to.eql([\"body\",\"password\"]);",
+                      "    pm.expect(error.msg).to.equal(`Value should have at least 15 items after validation, not ${lengthpassword}`);",
+                      "    pm.expect(error.input).to.equal(password);",
+                      "    pm.expect(error.ctx.field_type).to.equal(\"Value\");",
+                      "    pm.expect(error.ctx.min_length).to.equal(15);",
+                      "    pm.expect(error.ctx.actual_length).to.equal(lengthpassword);",
+                      "",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"{{full_name}}\",\n  \"email\": \"{{email}}\",\n  \"password\":\"{{short_password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/me/update",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update current user data invalid full_name",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid response for invalid title\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"string_type\");",
+                      "    pm.expect(error.loc).to.eql([\"body\", \"full_name\"]);",
+                      "    pm.expect(error.msg).to.equal(\"Input should be a valid string\");",
+                      "    pm.expect(error.input).to.equal(123123);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": 123123,\n  \"email\": \"{{$randomEmail}}\",\n  \"password\":\"{{$randomPassword}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/me/update",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update current user data no body",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid response for invalid title\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"missing\");",
+                      "    pm.expect(error.loc).to.eql([\"body\"]);",
+                      "    pm.expect(error.msg).to.equal(\"Field required\");",
+                      "    pm.expect(error.input).to.be.null;",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/me/update",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get user's posts nonexistant user_id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 404\", function(){",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid response\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"User Not Found\");",
+                      "})"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/getposts/2000000000",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "getposts",
+                    "2000000000"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get user's posts from user_id no token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for no token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Not authenticated\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/getposts/{{target_user_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "getposts",
+                    "{{target_user_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get user's posts from user_id invalid authentication",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for no token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Could not validate credentials\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{fake_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/getposts/{{target_user_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "getposts",
+                    "{{target_user_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete current user no token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for no token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Not authenticated\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/users/me/delete",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "delete"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete current user invalid authentication",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for no token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Could not validate credentials\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{fake_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/users/me/delete",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "me",
+                    "delete"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "Success",
+          "item": [
+            {
+              "name": "Create a post for current user",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 201\",function(){",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "const expectedTitle = pm.environment.get(\"title\");",
+                      "pm.test(\"Valid response\", function(){",
+                      "    pm.expect(resp).to.have.property(\"user_id\");",
+                      "    pm.expect(Number.isInteger(resp.user_id)).to.be.true;",
+                      "    pm.expect(resp).to.have.property(\"post_id\");",
+                      "    pm.expect(Number.isInteger(resp.post_id)).to.be.true;",
+                      "    pm.expect(resp).to.have.property(\"title\");",
+                      "    pm.expect(resp.title).to.equal(expectedTitle);",
+                      "});",
+                      "if (pm.response.code === 201 && resp.post_id) {",
+                      "    pm.environment.set(\"owned_post_id\", resp.post_id);",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "const title = pm.variables.replaceIn(\"{{$randomPhrase}}\");",
+                      "pm.environment.set(\"title\", title);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\":\"{{title}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/posts/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get all posts",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\", function(){",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Each returned post has required fields\", function(){",
+                      "    resp.forEach(post =>{",
+                      "        pm.expect(post).to.have.property(\"user_id\");",
+                      "        pm.expect(Number.isInteger(post.user_id)).to.be.true;",
+                      "",
+                      "        pm.expect(post).to.have.property(\"post_id\");",
+                      "        pm.expect(Number.isInteger(post.post_id)).to.be.true;",
+                      "",
+                      "        pm.expect(post).to.have.property(\"title\");",
+                      "        pm.expect(post.title === null || typeof post.title === \"string\").to.be.true;",
+                      "    });",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/posts/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": null,
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get post data from post_id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\", function(){",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid response\", function(){",
+                      "    pm.expect(resp).to.have.property(\"user_id\");",
+                      "    pm.expect(Number.isInteger(resp.user_id)).to.be.true;",
+                      "    pm.expect(resp).to.have.property(\"post_id\");",
+                      "    pm.expect(Number.isInteger(resp.post_id)).to.be.true;",
+                      "    pm.expect(resp).to.have.property(\"title\");",
+                      "    pm.expect(resp.title).to.be.a(\"string\");",
+                      "})"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/posts/{{target_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{target_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get owner of post from post_id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\", function(){",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "const expectedFullName=pm.environment.get(\"target_full_name\");",
+                      "const expectedUsername=pm.environment.get(\"target_username\");",
+                      "const expectedEmail=pm.environment.get(\"target_email\");",
+                      "const expectedUserid=Number(pm.environment.get(\"target_user_id\"));",
+                      "pm.test(\"Response matches expected user\",function(){",
+                      "    pm.expect(resp.full_name).to.equal(expectedFullName);",
+                      "    pm.expect(resp.user_name).to.equal(expectedUsername);",
+                      "    pm.expect(resp.email).to.equal(expectedEmail);",
+                      "    pm.expect(resp.id).to.equal(expectedUserid);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/getowner/{{target_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "getowner",
+                    "{{target_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update current user posts",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "const title = pm.variables.replaceIn(\"{{$randomPhrase}}\");",
+                      "pm.environment.set(\"title\", title);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\",function(){",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "const expectedUserid=Number(pm.environment.get(\"user_id\"));",
+                      "const expectedPostid=Number(pm.environment.get(\"owned_post_id\"));",
+                      "const expectedTitle=pm.environment.get(\"title\");",
+                      "pm.test(\"Valid Response\", function(){",
+                      "    pm.expect(resp).to.have.property(\"user_id\");",
+                      "    pm.expect(resp).to.have.property(\"post_id\");",
+                      "    pm.expect(resp).to.have.property(\"title\");",
+                      "    pm.expect(resp.user_id).to.equal(expectedUserid);",
+                      "    pm.expect(resp.post_id).to.equal(expectedPostid);",
+                      "    pm.expect(resp.title).to.equal(expectedTitle);",
+                      "    ",
+                      "});",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"{{title}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/posts/{{owned_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{owned_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete current user posts",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 200\", function(){",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid rsponse\", function(){",
+                      "    pm.expect(resp).to.have.property(\"ok\");",
+                      "    pm.expect(resp.ok).to.be.true;",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/posts/{{owned_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{owned_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Failure",
+          "item": [
+            {
+              "name": "Post creation with no token",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "const title = pm.variables.replaceIn(\"{{$randomPhrase}}\");",
+                      "pm.environment.set(\"fail_title\", title);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid esponse for no token\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Not authenticated\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\":\"{{fail_title}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/posts/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Post creation with invalid title",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid response for invalid title\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"string_type\");",
+                      "    pm.expect(error.loc).to.eql([\"body\", \"title\"]);",
+                      "    pm.expect(error.msg).to.equal(\"Input should be a valid string\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\":1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/posts/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Post creation with no body",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 422\", function(){",
+                      "    pm.response.to.have.status(422);",
+                      "});",
+                      "const resp=pm.response.json();",
+                      "pm.test(\"Valid response for no body\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.be.an(\"array\").that.is.not.empty;",
+                      "    const error=resp.detail[0];",
+                      "    pm.expect(error.type).to.equal(\"missing\");",
+                      "    pm.expect(error.loc).to.eql([\"body\"]);",
+                      "    pm.expect(error.msg).to.equal(\"Field required\");",
+                      "    pm.expect(error.input).to.be.null;",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "packages": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/posts/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Post fetch with nonexistent post_id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 404\", function(){",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid response for post_id does not exist\",function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Post Not Found\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/posts/2000000000",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "2000000000"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Post Update with nonexistent post_id",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "const title = pm.variables.replaceIn(\"{{$randomPhrase}}\");",
+                      "pm.environment.set(\"fail_title\", title);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 404\",function(){",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid Response for Post Not Found\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Post Not Found\");",
+                      "    ",
+                      "});",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"{{fail_title}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/posts/{{foreign_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{foreign_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Post Update with invalid authentication",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "const title = pm.variables.replaceIn(\"{{$randomPhrase}}\");",
+                      "pm.environment.set(\"fail_title\", title);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\",function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid Response for no authentication\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Could not validate credentials\");",
+                      "    ",
+                      "});",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{fake_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"{{fail_title}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/posts/{{owned_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{owned_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete post with invalid authentication",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\", function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid Response for no authentication\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Could not validate credentials\");",
+                      "    ",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{fake_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/posts/{{owned_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{owned_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete post with nonexistent post_id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 404\", function(){",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid Response for no authentication\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Post Not Found\");",
+                      "    ",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "packages": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/posts/{{foreign_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "posts",
+                    "{{foreign_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Post owner fetch with nonexistent post_id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 404\", function(){",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid Response for no authentication\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Post Not Found\");",
+                      "    ",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/getowner/{{foreign_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "getowner",
+                    "{{foreign_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Post owner fetch with invalid authentication",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status is 401\", function(){",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "const resp = pm.response.json();",
+                      "pm.test(\"Valid Response for no authentication\", function(){",
+                      "    pm.expect(resp).to.have.property(\"detail\");",
+                      "    pm.expect(resp.detail).to.equal(\"Could not validate credentials\");",
+                      "    ",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{fake_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/getowner/{{foreign_post_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "getowner",
+                    "{{foreign_post_id}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "User Deletion Success",
+      "item": [
+        {
+          "name": "Delete current user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", function(){",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const resp = pm.response.json();",
+                  "pm.test(\"Valid response\", function(){",
+                  "    pm.expect(resp).to.have.property(\"ok\");",
+                  "    pm.expect(resp.ok).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/me/delete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "delete"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "json_web_token_15de",
+      "secret": true
+    },
+    {
+      "key": "supabase_service_role_api_key_0u4g",
+      "secret": true
+    },
+    {
+      "key": "new_password",
+      "value": ""
+    },
+    {
+      "key": "new_full_name",
+      "value": ""
+    },
+    {
+      "key": "new_username",
+      "value": ""
+    },
+    {
+      "key": "new_email",
+      "value": ""
+    },
+    {
+      "key": "new_post_title",
+      "value": ""
+    },
+    {
+      "key": "offset",
+      "value": ""
+    },
+    {
+      "key": "limit",
+      "value": ""
+    },
+    {
+      "key": "short_password",
+      "value": ""
+    },
+    {
+      "key": "wrong_email_@",
+      "value": ""
+    },
+    {
+      "key": "wrong_email_username",
+      "value": ""
+    },
+    {
+      "key": "test_full_name",
+      "value": ""
+    },
+    {
+      "key": "test_email",
+      "value": ""
+    },
+    {
+      "key": "test_password",
+      "value": ""
+    },
+    {
+      "key": "test_username",
+      "value": ""
+    }
+  ]
+}
