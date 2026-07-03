@@ -221,7 +221,60 @@ User
 * Users can only modify or delete their own resources.
 * Input validation is handled using Pydantic models.
 
----
+## API Testing
+
+A comprehensive Postman collection is included to verify the API's functionality.
+
+### Coverage
+
+The collection contains automated tests for:
+
+- User authentication (signup and login)
+- User CRUD operations
+- Post CRUD operations
+- Authorization and authentication
+- Input validation
+- Success and failure scenarios
+- Pagination endpoints
+
+Tests validate:
+
+- HTTP status codes
+- Response schema
+- Returned values
+- Data types
+- Validation error responses
+- Authorization behavior
+
+### Running the collection
+
+1. Import the Postman collection.
+2. Import the sample Postman environment.
+3. Set the required environment variables.
+4. Start the API.
+5. Run the collection using the Collection Runner.
+
+### Environment variables
+
+The following variables must be configured before running the collection:
+
+| Variable | Description |
+|----------|-------------|
+| `base_url` | Base URL of the API |
+| `target_user_id` | Existing user ID used for read operations |
+| `target_full_name` | Expected full name of the target user |
+| `target_username` | Expected username of the target user |
+| `target_email` | Expected email of the target user |
+| `target_post_id` | Existing post used for read operations |
+| `foreign_post_id` | Post ID used for authorization tests |
+| `offset` | Pagination offset |
+| `limit` | Pagination limit |
+| `fake_access_token` | Invalid JWT used for authentication tests |
+| `short_password` | Password shorter than the minimum length |
+| `wrong_email_@` | Email missing the `@` symbol |
+| `wrong_email_username` | Email missing the username before `@` |
+
+The remaining variables (such as `access_token`, `user_id`, `owned_post_id`, `user_name`, `password`, and `email`) are generated automatically while the collection runs.
 
 ## Future Improvements
 
