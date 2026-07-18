@@ -1,5 +1,5 @@
-def test_login_success(client,user_data):
-    data=user_data
+def test_login_success(client,user_data_factory):
+    data=user_data_factory()
     response_signup=client.post("/signup",json=data)
     assert response_signup.status_code == 201
     signup_body=response_signup.json()

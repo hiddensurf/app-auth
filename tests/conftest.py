@@ -13,9 +13,19 @@ def client():
         yield client
     app.dependency_overrides.clear()
 @pytest.fixture
-def user_data():
-    return {"full_name":fake.name(),
-            "user_name":fake.user_name(),
-            "email":fake.email(),
-            "password":fake.password(length=16)}
+def user_data_factory():
+        def user_data():
+            return {"full_name":fake.name(),
+                    "user_name":fake.user_name(),
+                    "email":fake.email(),
+                    "password":fake.password(length=16)}
+        return user_data
+@pytest.fixture
+def fake_token():
+    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
+@pytest.fixture
+def registered_user(client,user_data_factory):
+    user=user_data_factory()
+    client.post("/signup",json=user)
+    return user
     
